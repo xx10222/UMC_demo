@@ -108,7 +108,8 @@ public class UserDao {
                         rs.getInt("userIdx"),
                         rs.getString("nickname"),
                         rs.getString("Email"),
-                        rs.getString("password")) // RowMapper(위의 링크 참조): 원하는 결과값 형태로 받기
+                        rs.getString("password"),
+                        rs.getString("status")) // RowMapper(위의 링크 참조): 원하는 결과값 형태로 받기
         ); // 복수개의 회원정보들을 얻기 위해 jdbcTemplate 함수(Query, 객체 매핑 정보)의 결과 반환(동적쿼리가 아니므로 Parmas부분이 없음)
     }
 
@@ -121,7 +122,8 @@ public class UserDao {
                         rs.getInt("userIdx"),
                         rs.getString("nickname"),
                         rs.getString("Email"),
-                        rs.getString("password")), // RowMapper(위의 링크 참조): 원하는 결과값 형태로 받기
+                        rs.getString("password"),
+                        rs.getString("status")), // RowMapper(위의 링크 참조): 원하는 결과값 형태로 받기
                 getUsersByNicknameParams); // 해당 닉네임을 갖는 모든 User 정보를 얻기 위해 jdbcTemplate 함수(Query, 객체 매핑 정보, Params)의 결과 반환
     }
 
@@ -134,7 +136,8 @@ public class UserDao {
                         rs.getInt("userIdx"),
                         rs.getString("nickname"),
                         rs.getString("Email"),
-                        rs.getString("password")), // RowMapper(위의 링크 참조): 원하는 결과값 형태로 받기
+                        rs.getString("password"),
+                        rs.getString("status")), // RowMapper(위의 링크 참조): 원하는 결과값 형태로 받기
                 getUserParams); // 한 개의 회원정보를 얻기 위한 jdbcTemplate 함수(Query, 객체 매핑 정보, Params)의 결과 반환
     }
 
@@ -158,7 +161,8 @@ public class UserDao {
                         rs.getInt("userIdx"),
                         rs.getString("nickname"),
                         rs.getString("Email"),
-                        rs.getString("password")),
+                        rs.getString("password"),
+                        rs.getString("status")),
                 getUserParams);
     }
 
@@ -172,7 +176,8 @@ public class UserDao {
                         rs.getInt("userIdx"),
                         rs.getString("nickname"),
                         rs.getString("Email"),
-                        rs.getString("password")),
+                        rs.getString("password"),
+                        rs.getString("status")),
                 getUserParams);
     }
 

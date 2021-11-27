@@ -29,7 +29,7 @@ public class PostDao {
         return this.jdbcTemplate.queryForObject(lastInsertIdQuery, int.class);
     }
 
-    // User 테이블에 존재하는 전체 유저들의 정보 조회
+    // Post 테이블에 존재하는 전체 게시물들의 정보 조회
     public List<GetPostRes> getPosts() {
         String getPostsQuery = "select * from Post"; //User 테이블에 존재하는 모든 회원들의 정보를 조회하는 쿼리
         return this.jdbcTemplate.query(getPostsQuery,
@@ -40,6 +40,47 @@ public class PostDao {
                         rs.getString("postImgUrl"))
         );
     }
+
+    // Post 테이블에 존재하는 전체 게시물들의 정보 조회 - 페이지
+    public List<GetPostRes> getPostsPage(int last_data_id, int size) {
+        String getPostsPageQuery = "select * from Post limit ? offset ?";
+        Object[] getPostsPageParams = new Object[]{size, last_data_id};
+
+        return this.jdbcTemplate.query(getPostsPageQuery,
+                (rs, rowNum) -> new GetPostRes(
+                        rs.getInt("postIdx"),
+                        rs.getInt("userIdx"),
+                        rs.getString("textcontent"),
+                        rs.getString("postImgUrl")),
+                getPostsPageParams);
+    }
+
+    // pageinfo 조회하기
+    public PageInfo getPageInfo(int last_date_id) {
+        int hasNext = 0; //다음 페이지 유무
+        int currentPage, totalPage;
+        int size = 5;
+        String getLastDataQuery = "SELECT postIdx FROM Post ORDER BY postIdx DESC LIMIT 1;";
+        int totalData = this.jdbcTemplate.queryForObject(getLastDataQuery, int.class);
+
+        if(totalData>last_date_id+size) //페이지 유무 확인
+        {
+            hasNext = 1;
+        }
+        System.out.println("dao : "+hasNext);
+        currentPage = last_date_id/size+1;
+        totalPage = totalData/size+1;
+
+        PageInfo pageInfo = new PageInfo(hasNext,size,currentPage,totalPage);
+        /*pageInfo.setDataPerPage(size);
+        pageInfo.setCurrentPage(currentPage);
+        pageInfo.setTotalPage(totalPage);
+        pageInfo.setDataPerPage(size);
+        pageInfo.setHasNext(hasNext);*/
+
+        return pageInfo;
+    }
+
     // 해당 postIdx를 갖는 게시물 조회
     public GetPostRes getPost(int postIdx) {
         String getPostQuery = "select * from Post where postIdx = ?"; // 해당 userIdx를 만족하는 유저를 조회하는 쿼리문
@@ -98,5 +139,12 @@ public class PostDao {
         return this.jdbcTemplate.queryForObject(lastInsertIdQuery, int.class);
     }
 
+    // 게시물 수정
+    public int modifyComment(PatchCommentReq patchCommentReq) {
+        String modifyCommentQuery = "update Comment set content = ? where commentIdx = ? ";
+        Object[] modifyCommentParams = new Object[]{patchCommentReq.getContent(), patchCommentReq.getCommentIdx()}; // 주입될 값들(nickname, userIdx) 순
+
+        return this.jdbcTemplate.update(modifyCommentQuery, modifyCommentParams); // 대응시켜 매핑시켜 쿼리 요청(생성했으면 1, 실패했으면 0)
+    }
 
 }

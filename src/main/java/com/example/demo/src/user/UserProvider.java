@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import static com.example.demo.config.BaseResponseStatus.*;
 
@@ -21,6 +23,7 @@ import static com.example.demo.config.BaseResponseStatus.*;
  * 요청한 작업을 처리하는 관정을 하나의 작업으로 묶음
  * dao를 호출하여 DB CRUD를 처리 후 Controller로 반환
  */
+@Transactional(readOnly = true)
 public class UserProvider {
 
 

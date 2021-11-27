@@ -3,19 +3,17 @@ package com.example.demo.src.post;
 import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
 import com.example.demo.src.post.model.*;
-import com.example.demo.src.user.model.*;
+import com.example.demo.src.post.model.GetPostRes;
 import com.example.demo.utils.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-import com.example.demo.src.post.*;
 
+import javax.transaction.Transactional;
+import java.awt.print.Pageable;
 import java.util.List;
-
-import static com.example.demo.config.BaseResponseStatus.POST_USERS_EMPTY_EMAIL;
-import static com.example.demo.config.BaseResponseStatus.POST_USERS_INVALID_EMAIL;
-import static com.example.demo.utils.ValidationRegex.isRegexEmail;
 
 
 @RestController
@@ -41,6 +39,19 @@ public class PostController {
     public BaseResponse<List<GetPostRes>> getPosts() throws BaseException {
         List<GetPostRes> getPostsRes = postProvider.getPosts();
         return new BaseResponse<>(getPostsRes);
+    }
+
+    @ResponseBody
+    @GetMapping("/page") // (GET) 127.0.0.1:9000/app/posts/page?last_data_id=?
+    public BaseResponse<GetPostsPageRes> getPostsPage(@RequestParam(required = false) int last_data_id) throws BaseException {
+        PageInfo pageInfo = postProvider.getPageInfo(last_data_id);
+        int size = pageInfo.getDataPerPage();
+        List<GetPostRes> getPostsRes = postProvider.getPostsPage(last_data_id, size);
+        GetPostsPageRes getPostsPageRes = new GetPostsPageRes(getPostsRes,pageInfo);
+        //getPostsPageRes.setGetPostsRes(getPostsRes);
+        //getPostsPageRes.setPageInfo(pageInfo);
+
+        return new BaseResponse<>(getPostsPageRes);
     }
 
     //[POST] 게시물 추가
@@ -75,17 +86,6 @@ public class PostController {
     @PatchMapping("/{postIdx}/update") // (GET) 127.0.0.1:9000/app/posts/:postIdx/update
     public BaseResponse<String> modifyPostContent(@PathVariable("postIdx") int postIdx, @RequestBody Post post) {
         try {
-/**
- *********** 해당 부분은 7주차 - JWT 수업 후 주석해체 해주세요!  ****************
- //jwt에서 idx 추출.
- int userIdxByJwt = jwtService.getUserIdx();
- //userIdx와 접근한 유저가 같은지 확인
- if(userIdx != userIdxByJwt){
- return new BaseResponse<>(INVALID_USER_JWT);
- }
- //같다면 유저네임 변경
- **************************************************************************
- */
             PatchPostReq patchPostReq = new PatchPostReq(postIdx, post.getTextcontent());
             postService.modifyPostTextcontent(patchPostReq);
             String result = "게시물이 수정되었습니다.";
@@ -138,5 +138,21 @@ public class PostController {
         }
     }
 
+    /**
+     * 댓글 수정 API !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * [PATCH] /app/posts/comments/{commentIdx}/update
+     */
+    @ResponseBody
+    @PatchMapping("/comments/{commentIdx}/update") // (GET) 127.0.0.1:9000/app/posts/:postIdx/update
+    public BaseResponse<String> modifyComment(@PathVariable("commentIdx") int commentIdx, @RequestBody Comment comment) {
+        try {
+            PatchCommentReq patchCommentReq = new PatchCommentReq(commentIdx, comment.getContent());
+            postService.modifyComment(patchCommentReq);
+            String result = "댓글이 수정되었습니다.";
+            return new BaseResponse<>(result);
 
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
 }
